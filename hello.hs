@@ -1,1 +1,1 @@
-main = putStrLn "Hello, world! and all"
+main = putStrLn "Hello, best world world!"
