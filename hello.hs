@@ -1,1 +1,1 @@
-main = putStrLn "Hello there, best world world! Trying CoAuther"
+main = putStrLn "Hello there, best world world! Another force push"
