@@ -1,0 +1,27 @@
+name: testing transient secrets
+on:
+  push:
+    branches:
+      - master
+jobs:
+  transient:
+    name: Transient Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-duration-seconds: 900 # 15 mins
+          role-session-name: AdminSession
+      - name: step1
+        shell: bash
+        id: export_vars
+        run: bash .github/env.sh
+      - name: echo secrets
+        run: echo ${{ env.DB_USERNAME }}
