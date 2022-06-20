@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function setEnv {
+function exportWithMask {
     SSM_PARAMETER_NAME=$1
     ENV_VARIABLE_NAME=$2
     
@@ -9,5 +9,4 @@ function setEnv {
     echo "$ENV_VARIABLE_NAME=$PARAMETER_VALUE" >> $GITHUB_ENV
 }
 
-setEnv '/dev/crater/DB_USERNAME' 'DB_USERNAME'
-
+exportWithMask '/dev/crater/DB_USERNAME' 'DB_USERNAME'
