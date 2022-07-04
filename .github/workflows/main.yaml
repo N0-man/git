@@ -1,8 +1,10 @@
-name: testing env
+name: testing tagging
 on:
   push:
     branches:
       - master
+    tags:
+      - '*'
   workflow_dispatch:
     inputs:
       environment:
@@ -15,15 +17,41 @@ on:
           - qa
           - demo
 env:
-  ENVIRONMENT: ${{ github.event.inputs.environment || 'dev'}}
-  ENVIRONMENT_DNS: ${{ env.ENVIRONMENT == 'demo' && 'lite.mybahmni.in' || format('{0}.{1}', env.ENVIRONMENT, 'lite.mybahmni.in') }}
-
+  APP_VERSION: 1.0.4
 jobs:
   envtest:
     name: Testing env
     runs-on: ubuntu-latest
     steps:
-      # - name: Checkout repository
-      #   uses: actions/checkout@v2
-      - name: step1
-        run: echo ${{ env.ENVIRONMENT_DNS }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: echo
+        run: |
+          echo ${{ github.ref }}
+          echo ${{ env.APP_VERSION }}
+          echo ${{ github.event.release.tag_name }}
+          echo GITHUB_TAG=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+          echo ${GITHUB_REF#refs/tags/}
+          echo "event name is:" ${{ github.event_name }} 
+          echo "event type is:" ${{ github.event.action }}
+      - name: derive version tag
+        run: |
+          if [[ "${{ github.ref }}" =~ ^refs/tags* ]]; then
+            echo "running for a release for ${{ env.GITHUB_TAG }}"
+            if [ "${{ env.GITHUB_TAG }}" != "${{ env.APP_VERSION }}" ]; then
+              echo "tag ${{ env.GITHUB_TAG }} pushed does not match with APP_VERSION ${{ env.APP_VERSION }} in .github/worlflows/deploy. Please push correct release tag"
+              exit 1
+            fi
+            echo "VERSION_TAG=${{ env.APP_VERSION }}" >> $GITHUB_ENV
+          else
+            echo "running for a ci commit"
+            if [ $(git tag -l ${{ env.APP_VERSION }}) ]; then 
+              echo "Version ${{ env.APP_VERSION }} already released. Please update your version"
+              exit 1
+            fi
+            echo "VERSION_TAG=${{ env.APP_VERSION }}-${{ github.run_number }}" >> $GITHUB_ENV
+          fi
+      - name: echo TAG
+        run: echo ${{ env.VERSION_TAG}}
