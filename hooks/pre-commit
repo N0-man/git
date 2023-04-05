@@ -1,0 +1,2 @@
+#!/bin/sh
+trivy fs --severity CRITICAL --security-checks secret .
